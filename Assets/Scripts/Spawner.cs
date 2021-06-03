@@ -1,10 +1,16 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Spawner : MonoBehaviour
 {
+	public event Action OnAllEnemiesFallen;
 	[SerializeField] private GameZone _gameZone;
 	[SerializeField] private Transform _grass;
 	[SerializeField] private EnemyAI _prefab;
+
+	private List<EnemyAI> _enemies = new List<EnemyAI>();
 	
 	public void Spawn(int count)
 	{
@@ -15,15 +21,16 @@ public class Spawner : MonoBehaviour
 
 			var enemy = Instantiate(_prefab, position, Quaternion.identity);
 			enemy.Initialize(_gameZone, _grass);
+			enemy.OnFall += () => EnemyFallHandler(enemy);
+			_enemies.Add(enemy);
 		}
 	}
 
-	public void DestroyEnemy(ref int enemiesCount)
+	private void EnemyFallHandler(EnemyAI enemy)
 	{
-		if (transform.position.y < _grass.transform.position.y)
-		{
-			Destroy(gameObject);
-			enemiesCount--;
-		}
+		_enemies.Remove(enemy);
+		Destroy(enemy.gameObject);
+		if (_enemies.Count == 0)
+			OnAllEnemiesFallen?.Invoke();
 	}
 }

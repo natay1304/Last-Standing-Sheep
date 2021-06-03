@@ -24,27 +24,6 @@ public class GameController : MonoBehaviour
 	[SerializeField] private Spawner _spawner;
 	private bool _gameOver;
 
-	private void Update()
-	{
-		if (_gameOver)
-			return;
-
-		_spawner.DestroyEnemy(ref _enemyCount);
-		_player.CheckPlayerFalling();
-
-		if (_enemyCount > 0 && !_player.PlayerFalled)
-			return;
-		
-		if (_enemyCount == 0 || _player.PlayerFalled)
-		{
-			_gameOver = true;
-			_gameOverView.SetText(_player.PlayerFalled ? "Y O U  L O S E" : "Y O U  W I N");
-			_gameOverPanel.SetActive(true);
-			_timer.Pause(true);
-			_gameRecordsLoader.AddPlayerResult("MY NAME", _timer.CurrentTime);
-		}
-	}
-
 	private void Awake()
 	{
 		_settingsButton.onClick.AddListener(SettingsButtonHandler);
@@ -57,6 +36,24 @@ public class GameController : MonoBehaviour
 	private void Start()
 	{
 		_timer.StartTimer();
+		_player.OnPlayerFallen += OnPlayerFallenHandler;
+		_spawner.OnAllEnemiesFallen += OnAllEnemiesFallenHandler;
+	}
+
+	private void OnAllEnemiesFallenHandler()
+	{
+		_gameOverView.SetText("Y O U  W I N");
+		_gameOverPanel.SetActive(true);
+		_timer.Pause(true);
+		_gameRecordsLoader.AddPlayerResult("MY NAME", _timer.CurrentTime);
+	}
+
+	private void OnPlayerFallenHandler()
+	{
+		_gameOverView.SetText("Y O U  L O S E");
+		_gameOverPanel.SetActive(true);
+		_timer.Pause(true);
+		_gameRecordsLoader.AddPlayerResult("MY NAME", _timer.CurrentTime);
 	}
 
 	private void LoadMenuHandler()

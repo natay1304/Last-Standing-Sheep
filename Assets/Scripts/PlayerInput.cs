@@ -1,36 +1,37 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using EasyJoystick;
 using UnityEngine;
 
 public class PlayerInput : MonoBehaviour
 {
+	public event Action OnPlayerFallen;
 	[SerializeField] private Joystick _joystickPrefab;
 	[SerializeField] private MovementController _movementController;
 	[SerializeField] private Transform _grass;
-
-	private bool _playerFalled;
+	
 	private float _targetAngle = 0;
-
-	public bool PlayerFalled => _playerFalled;
+	private bool _gameOver = false;
 
 	private void Update()
 	{
+		
+		
 		float xMovement = _joystickPrefab.Horizontal();
 		float zMovement = _joystickPrefab.Vertical();
 		Vector2 targetPosition = new Vector2(xMovement, zMovement);
-
 		_movementController.Move(targetPosition);
+		
+		if(_gameOver)
+			return;
+		CheckPlayerFalling();
 	}
 
 	public void CheckPlayerFalling()
 	{
-		if (transform.position.y < _grass.position.y)
+		if (transform.position.y < _grass.position.y - 2f)
 		{
-			transform.position = new Vector3(transform.position.x, _grass.position.y - 2f, transform.position.z);
-			_playerFalled = true;
+			OnPlayerFallen?.Invoke();
+			_gameOver = true;
 		}
-		else
-			_playerFalled = false;
 	}
 }

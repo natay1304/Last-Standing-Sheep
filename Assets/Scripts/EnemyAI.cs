@@ -1,6 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class EnemyAI : MonoBehaviour
 {
@@ -11,6 +11,7 @@ public class EnemyAI : MonoBehaviour
 	private bool _targetReached;
 	private Vector3 _targetPosition;
 	private float _reachDistance = 0.2f;
+	public event Action OnFall;
 
 	private void Update()
 	{
@@ -25,8 +26,10 @@ public class EnemyAI : MonoBehaviour
 			_movementController.Move(new Vector2(movement.x, movement.z));
 		}
 
-		if (transform.position.y < _grass.position.y - 5f)
-			Destroy(gameObject);
+		if (transform.position.y < _grass.position.y - 3f)
+		{
+			OnFall?.Invoke();
+		}
 	}
 
 	public void Initialize(GameZone gameZone, Transform grass)
